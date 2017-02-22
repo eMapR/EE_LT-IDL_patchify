@@ -99,8 +99,14 @@
 
 function lt_label, run_params, subset=subset, output_path=output_path, sspan=sspan
 
-  run_name = run_params.run_name
-  diag_file = run_params.diag_file
+  ;run_name = run_params.run_name
+  ;diag_file = run_params.diag_file
+  in_path = run_params.in_path
+  out_path = run_params.out_path
+  minyear = run_params.min_year
+  maxyear = run_params.max_year
+  
+  
   class_codes = run_params.class_codes
   filter_params = run_params.filter_params
   merge_recovery = run_params.merge_recovery
@@ -108,36 +114,52 @@ function lt_label, run_params, subset=subset, output_path=output_path, sspan=ssp
   end_year = run_params.end_year
   start_year = run_params.start_year
   
-  param_variables = tag_names(run_params)
-  theone = where(param_variables eq 'USE_RELATIVE_MAG', n_hits)
-  if n_hits eq 0 then use_relative_mag = 1 else begin
-    checkit = run_params.use_relative_mag
-    if checkit eq 'yes' then use_relative_mag = 1
-    if checkit eq 'no' then use_relative_mag = 0
-    if checkit ne 'no' and checkit ne 'yes' then message, "within the label parameter file, the variable 'use_relative_mag' can only equal: yes or no"
-  endelse
+  ;param_variables = tag_names(run_params)
+  ;theone = where(param_variables eq 'USE_RELATIVE_MAG', n_hits)
+  ;if n_hits eq 0 then use_relative_mag = 1 else begin
+  ;  checkit = run_params.use_relative_mag
+  ;  if checkit eq 'yes' then use_relative_mag = 1
+  ;  if checkit eq 'no' then use_relative_mag = 0
+  ;  if checkit ne 'no' and checkit ne 'yes' then message, "within the label parameter file, the variable 'use_relative_mag' can only equal: yes or no"
+  ;endelse
   
   
   ;first check to make sure all of the vertyr, etc. images are there
-  len = strlen(diag_file)
-  endpos = strpos(diag_file, '_diag.sav')
+  ;len = strlen(diag_file)
+  ;endpos = strpos(diag_file, '_diag.sav')
   
-  simple_core_name =  strmid(diag_file, 0, endpos)
-  vertval_file = simple_core_name + "_vertvals.bsq"
-  vertyr_file = simple_core_name + "_vertyrs.bsq"
-  endyear_file = simple_core_name + "_endyear.bsq"     ; NEW END_YEAR layer
-  startyear_file = simple_core_name + "_startyear.bsq"     ; NEW START_YEAR layer  
+  ;simple_core_name =  strmid(diag_file, 0, endpos)
+  ;vertval_file = simple_core_name + "_vert_vals.bsq"
+  ;vertyr_file = simple_core_name + "_vert_yrs.bsq"
+  
+  vertval_file = file_search(in_path, '*vert_vals.bsq')
+  vertyr_file = file_search(in_path, '*vert_yrs.bsq')
+ 
+  endyear_file = "/dummy/" + "_endyear.bsq"     ; NEW END_YEAR layer
+  startyear_file = "/dummy/" + "_startyear.bsq"     ; NEW START_YEAR layer
+ 
+  
+;  endyear_file = simple_core_name + "_endyear.bsq"     ; NEW END_YEAR layer
+;  startyear_file = simple_core_name + "_startyear.bsq"     ; NEW START_YEAR layer  
 ;  mag_file = simple_core_name + "_mags.bsq"           ; not needed anymore. mags and durs 
 ;  dur_file = simple_core_name + "_durs.bsq"           ; change for different END_YEARS. so
 ;  distrec_file = simple_core_name + "_distrec.bsq"    ; these images are no re-calculated here on the fly.
 
+
+
+
   
   
   ;make sure fitted images exist
-  if extract_tc_ftv eq 'yes' then begin
-    b_ftv_file = simple_core_name + "_brightness_ftv_fitted.bsq"
-    g_ftv_file = simple_core_name + "_greenness_ftv_fitted.bsq"
-    w_ftv_file = simple_core_name + "_wetness_ftv_fitted.bsq"
+  if extract_tc_ftv eq 1 then begin
+    ;b_ftv_file = simple_core_name + "_brightness_ftv_fitted.bsq"
+    ;g_ftv_file = simple_core_name + "_greenness_ftv_fitted.bsq"
+    ;w_ftv_file = simple_core_name + "_wetness_ftv_fitted.bsq"
+    
+    b_ftv_file = file_search(in_path, '*tcb_ftv.bsq')
+    g_ftv_file = file_search(in_path, '*tcg_ftv.bsq')
+    w_ftv_file = file_search(in_path, '*tcw_ftv.bsq')
+    
     print, b_ftv_file
     if file_exists(b_ftv_file) eq 0 then return, {ok:0, message: 'fitted brightness does not exists'}
     if file_exists(g_ftv_file) eq 0 then return, {ok:0, message: 'fitted greenness does not exists'}
@@ -183,14 +205,14 @@ function lt_label, run_params, subset=subset, output_path=output_path, sspan=ssp
   ;there is a single label file, which corresponds to user rule, and
   ;there could be other individual files depends on the flag in the rule.
     
-  path = file_dirname(simple_core_name, /mark_directory)
-  core_name_file_component = file_basename(simple_core_name)
-  outpath = path + run_name
+  ;path = file_dirname(simple_core_name, /mark_directory)
+  ;core_name_file_component = file_basename(simple_core_name)
+  ;outpath = path + run_name
   
-  if keyword_set(output_path) then outpath = output_path
+  if keyword_set(output_path) then out_path = output_path
   
-  file_mkdir,outpath
-  core_name = outpath+path_sep()+core_name_file_component + "_"
+  file_mkdir,out_path
+  core_name = out_path ;+path_sep()+core_name_file_component + "_"
   
   
   ;determine output image dimension
@@ -216,14 +238,17 @@ function lt_label, run_params, subset=subset, output_path=output_path, sspan=ssp
   write_im_hdr, output_label_file, hdr1
   
   ; now create the metadata file
-  this_meta = stringswap(output_label_file, ".bsq", "_meta.txt")
+  ; feb 21, 2017 jdb - turning off metadata for now since we don't have diag file or metadata files to concatenate
+  ; 
+  ; 
+;  this_meta = stringswap(output_label_file, ".bsq", "_meta.txt")
   
-  infiles = [vertyr_file, vertval_file]
-  files = file_basename(infiles+[replicate(','+string(10b), n_elements(infiles)-1), ''])
-  files = string(files, format='('+string(n_elements(files))+'A)')      
-  meta = create_struct("DATA", "Landtrendr Label Image", "FILENAME", file_basename(output_label_file), "PARENT_FILE", files, run_params)
-  label_params = prepare_label_params_as_metadata(meta)
-  concatenate_metadata, infiles, this_meta, params=label_params
+;  infiles = [vertyr_file, vertval_file]
+;  files = file_basename(infiles+[replicate(','+string(10b), n_elements(infiles)-1), ''])
+;  files = string(files, format='('+string(n_elements(files))+'A)')      
+;  meta = create_struct("DATA", "Landtrendr Label Image", "FILENAME", file_basename(output_label_file), "PARENT_FILE", files, run_params)
+;  label_params = prepare_label_params_as_metadata(meta)
+;  concatenate_metadata, infiles, this_meta, params=label_params
   
   ;create individual image file if needed
   output_files = strarr(n_classes)
@@ -258,18 +283,21 @@ function lt_label, run_params, subset=subset, output_path=output_path, sspan=ssp
     hdr1.pixeltype = 6
     write_im_hdr,   output_file, hdr1
     
+    
+    ; feb 21, 2017 jdb - turning off metadata for now since we don't have diag file or metadata files to concatenate
+    ; 
     ; now create the metadata file
-    this_meta = stringswap(output_file, ".bsq", "_meta.txt")
+;    this_meta = stringswap(output_file, ".bsq", "_meta.txt")
   
-    infiles = [vertyr_file, vertval_file]
-    files = file_basename(infiles+[replicate(','+string(10b), n_elements(infiles)-1), ''])
-    files = string(files, format='('+string(n_elements(files))+'A)')      
-    meta = create_struct("DATA", interpd_class_codes[class].class_name, "FILENAME", file_basename(output_file), "PARENT_FILE", files, run_params)
-    label_params = prepare_label_params_as_metadata(meta)
-    concatenate_metadata, infiles, this_meta, params=label_params
+;    infiles = [vertyr_file, vertval_file]
+;    files = file_basename(infiles+[replicate(','+string(10b), n_elements(infiles)-1), ''])
+;    files = string(files, format='('+string(n_elements(files))+'A)')      
+;    meta = create_struct("DATA", interpd_class_codes[class].class_name, "FILENAME", file_basename(output_file), "PARENT_FILE", files, run_params)
+;    label_params = prepare_label_params_as_metadata(meta)
+;    concatenate_metadata, infiles, this_meta, params=label_params
   
     ;create predisturbance tc file
-    if extract_tc_ftv eq 'yes' then begin
+    if extract_tc_ftv eq 1 then begin
       openw, fun, ftv_file, /get_lun
       filesize = ulong(layersize) * n_segs * 6  ;B, G, W, ▲B, ▲G, ▲W
       point_lun, fun, filesize - 2
@@ -280,30 +308,46 @@ function lt_label, run_params, subset=subset, output_path=output_path, sspan=ssp
       hdr2.pixeltype = 6
       write_im_hdr, ftv_file, hdr2
       
+      
+      ; feb 21, 2017 jdb - turning off metadata for now since we don't have diag file or metadata files to concatenate
+      ; 
       ; now create the metadata file
-      this_meta = stringswap(ftv_file, ".bsq", "_meta.txt")
-  
-      infiles = [vertyr_file, vertval_file, b_ftv_file, g_ftv_file, w_ftv_file]
-      files = file_basename(infiles+[replicate(','+string(10b), n_elements(infiles)-1), ''])
-      files = string(files, format='('+string(n_elements(files))+'A)')      
-      meta = create_struct("DATA", interpd_class_codes[class].class_name + " segment history", "FILENAME", file_basename(ftv_file), "PARENT_FILE", files, run_params)
-      label_params = prepare_label_params_as_metadata(meta)
-      concatenate_metadata, infiles, this_meta, params=label_params
+;      this_meta = stringswap(ftv_file, ".bsq", "_meta.txt")
+;  
+;      infiles = [vertyr_file, vertval_file, b_ftv_file, g_ftv_file, w_ftv_file]
+;      files = file_basename(infiles+[replicate(','+string(10b), n_elements(infiles)-1), ''])
+;      files = string(files, format='('+string(n_elements(files))+'A)')      
+;      meta = create_struct("DATA", interpd_class_codes[class].class_name + " segment history", "FILENAME", file_basename(ftv_file), "PARENT_FILE", files, run_params)
+;      label_params = prepare_label_params_as_metadata(meta)
+;      concatenate_metadata, infiles, this_meta, params=label_params
     endif
   endfor
   
+  
+  
+  
+  ;feb 21, 2017. jdb
+  ;
+  ;there is no diag file so we get min and max year from the user in run_param structure
+  ;
   ;retrieve diagnosis information
-  restore, diag_file
-  image_info = diag_info.image_info
+;  restore, diag_file
+;  image_info = diag_info.image_info
 
   ;april 15, 2014. REK
   ;   logic of extract FTV broken -- it assumes that all_years is continuous, but it was not
   ;   to fix, we set "all_years" to be the continuous layers starting with the minimum year
 
-  every_year = image_info.year
-  unique_years = fast_unique(every_year)
-  minyear = min(unique_years, max=maxyear)
-  all_years = minyear+indgen(maxyear-minyear+1)
+  
+  ;feb 21, 2017. jdb
+  ;
+  ;old version - there is no diag file so we get min and max year from the user in run_param structure
+  ;
+  ;every_year = image_info.year
+  ;unique_years = fast_unique(every_year)
+  ;minyear = min(unique_years, max=maxyear)
+  
+  all_years = minyear+indgen(maxyear-minyear+1) ; create a list of all the years from min to max
 
   ;old version
   ;all_years = unique_years[sort(unique_years)]
@@ -362,7 +406,7 @@ function lt_label, run_params, subset=subset, output_path=output_path, sspan=ssp
 
      
     ;read in ftv_tc image if needed
-    if extract_tc_ftv eq 'yes' then begin
+    if extract_tc_ftv eq 1 then begin
       zot_img, b_ftv_file, hdr, b_ftv, subset=this_subset
       zot_img, g_ftv_file, hdr, g_ftv, subset=this_subset
       zot_img, w_ftv_file, hdr, w_ftv, subset=this_subset
@@ -378,7 +422,7 @@ function lt_label, run_params, subset=subset, output_path=output_path, sspan=ssp
     for class = 0, n_classes-1 do begin
       print, "Processing class " + string(class+1) + " of " + string(n_classes)
       this_image = intarr(xsize, ysize, output_segs[class] * 4)
-      if extract_tc_ftv eq 'yes' then ftv_image = intarr(xsize, ysize, output_segs[class] * 6)
+      if extract_tc_ftv eq 1 then ftv_image = intarr(xsize, ysize, output_segs[class] * 6)
       
       for x = 0, xsize-1 do begin
         for y = 0, ysize-1 do begin
@@ -405,7 +449,7 @@ function lt_label, run_params, subset=subset, output_path=output_path, sspan=ssp
               label_image[x,y] = ok.class_num
               
               ;now extract ftv image and the corresponding magnitude.
-              if extract_tc_ftv eq 'yes' then $
+              if extract_tc_ftv eq 1 then $
              		ftv_image[x,y,*] = read_segment_spectral(b_ftv[x,y,*], g_ftv[x,y,*], w_ftv[x, y, *], ok.outvals, all_years)
             endif
           endif
@@ -425,7 +469,7 @@ function lt_label, run_params, subset=subset, output_path=output_path, sspan=ssp
         free_lun, un
       endif
       
-      if extract_tc_ftv eq 'yes' then begin
+      if extract_tc_ftv eq 1 then begin
         openu, un, ftv_files[class], /get_lun
         n_segs = output_segs[class]
         
@@ -461,6 +505,6 @@ function lt_label, run_params, subset=subset, output_path=output_path, sspan=ssp
   
   export_structure_to_file, out_descriptor_structure, output_descriptor_file
   
-  return, {ok:1, outpath:outpath, core_name:core_name}
+  return, {ok:1, outpath:out_path, core_name:core_name}
   
 end

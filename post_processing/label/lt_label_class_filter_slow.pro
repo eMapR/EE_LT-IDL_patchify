@@ -122,9 +122,9 @@ PRO lt_label_class_filter_slow, label_image_directory, output_image_directory,$
             write_im_hdr, filtered_image, this_hdr
             
             ; now create the metadata file
-            this_meta = stringswap(filtered_image, ".bsq", "_meta.txt")
-            meta = create_struct("DATA", "Slow Filtered Landtrendr Label Image", "FILENAME", file_basename(filtered_image), "PARENT_FILE", files, run_params)
-            concatenate_metadata, infiles, this_meta, params=meta 
+            ;this_meta = stringswap(filtered_image, ".bsq", "_meta.txt")
+            ;meta = create_struct("DATA", "Slow Filtered Landtrendr Label Image", "FILENAME", file_basename(filtered_image), "PARENT_FILE", files, run_params)
+            ;concatenate_metadata, infiles, this_meta, params=meta 
             
         END
         
@@ -139,9 +139,9 @@ PRO lt_label_class_filter_slow, label_image_directory, output_image_directory,$
             write_im_hdr, out_patch_file, this_hdr
             
             ; now create the metadata file
-            this_meta = stringswap(out_patch_file, ".bsq", "_meta.txt")
-            meta = create_struct("DATA", "Slow Filtered Landtrendr Label Patch ID", "FILENAME", file_basename(out_patch_file), "PARENT_FILE", files, run_params)
-            concatenate_metadata, infiles, this_meta, params=meta       
+            ;this_meta = stringswap(out_patch_file, ".bsq", "_meta.txt")
+            ;meta = create_struct("DATA", "Slow Filtered Landtrendr Label Patch ID", "FILENAME", file_basename(out_patch_file), "PARENT_FILE", files, run_params)
+            ;concatenate_metadata, infiles, this_meta, params=meta       
         END
         
         pid = ulonarr(fs[0], fs[1])
