@@ -132,8 +132,14 @@ function lt_label, run_params, subset=subset, output_path=output_path, sspan=ssp
   ;vertval_file = simple_core_name + "_vert_vals.bsq"
   ;vertyr_file = simple_core_name + "_vert_yrs.bsq"
   
-  vertval_file = file_search(in_path, '*vert_vals.bsq')
+  vertval_file = file_search(in_path, '*vert_fit.bsq')
   vertyr_file = file_search(in_path, '*vert_yrs.bsq')
+  
+  len = strlen(vertval_file)
+  endpos = strpos(vertval_file, '_vert_fit.bsq')
+  simple_core_name =  file_basename(strmid(vertval_file, 0, endpos))
+ 
+ 
  
   endyear_file = "/dummy/" + "_endyear.bsq"     ; NEW END_YEAR layer
   startyear_file = "/dummy/" + "_startyear.bsq"     ; NEW START_YEAR layer
@@ -156,9 +162,9 @@ function lt_label, run_params, subset=subset, output_path=output_path, sspan=ssp
     ;g_ftv_file = simple_core_name + "_greenness_ftv_fitted.bsq"
     ;w_ftv_file = simple_core_name + "_wetness_ftv_fitted.bsq"
     
-    b_ftv_file = file_search(in_path, '*tcb_ftv.bsq')
-    g_ftv_file = file_search(in_path, '*tcg_ftv.bsq')
-    w_ftv_file = file_search(in_path, '*tcw_ftv.bsq')
+    b_ftv_file = file_search(in_path, '*ftv_tcb.bsq')
+    g_ftv_file = file_search(in_path, '*ftv_tcg.bsq')
+    w_ftv_file = file_search(in_path, '*ftv_tcw.bsq')
     
     print, b_ftv_file
     if file_exists(b_ftv_file) eq 0 then return, {ok:0, message: 'fitted brightness does not exists'}
@@ -212,7 +218,7 @@ function lt_label, run_params, subset=subset, output_path=output_path, sspan=ssp
   if keyword_set(output_path) then out_path = output_path
   
   file_mkdir,out_path
-  core_name = out_path ;+path_sep()+core_name_file_component + "_"
+  core_name = out_path + simple_core_name + '_' ;+path_sep()+core_name_file_component + "_"
   
   
   ;determine output image dimension
@@ -221,7 +227,7 @@ function lt_label, run_params, subset=subset, output_path=output_path, sspan=ssp
     zot_img, vertval_file, hdr, vv_img,  /hdronly
     
   ;create label image
-  output_label_file = core_name + '_LTlabel.bsq'
+  output_label_file = core_name + 'LTlabel.bsq'
   
   openw, un,  output_label_file, /get_lun
   n_output_layers = 1ul
