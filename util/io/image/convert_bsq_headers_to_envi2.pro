@@ -62,10 +62,15 @@ pro convert_bsq_headers_to_envi2, path, template_bsq_file, overwrite=overwrite, 
   ;headerfile = potential_header[where(checker eq 1, many)]
   ;if many ne 1 then headerfile = headerfile[0] ;just take the zeroth one
   openr, un, template_bsq_file, /get_lun
-  query_file2, un, 'map info', mapinfo, separator='=', /norestart
-  query_file2, un, 'projection info', projinfo, separator = '=', /norestart
-  query_file2, un, 'coordinate system string', coordsysstr, separator = '=', /norestart
+  query_file2, un, 'map info', mapinfo, separator='=';, /norestart
+  ;free_lun, un
+  ;openr, un, template_bsq_file, /get_lun
+  query_file2, un, 'projection info', projinfo, separator = '=';, /norestart
+  ;free_lun, un
+  ;openr, un, template_bsq_file, /get_lun
+  query_file2, un, 'coordinate system string', coordsysstr, separator = '=';, /norestart
   free_lun, un
+  
   ;if mapinfo eq 'no_match' then begin
   ;  print, 'The header for the template file appears to have no map information'
   ;  print, headerfile
