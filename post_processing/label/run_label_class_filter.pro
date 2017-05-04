@@ -1,13 +1,16 @@
-pro run_label_class_filter, class_code_txt, label_parameters_txt, diag_file 
+pro run_label_class_filter, code_list, outputs_path
+
+;class_code_txt, label_parameters_txt, diag_file 
+
   ;------ identify path separator -------
-  pse = path_sep()
+;  pse = path_sep()
 
   ;open the label_codes file
-  openr, lun, class_code_txt, /get_lun
-  file_size = file_lines(class_code_txt,/noexpand_path)
-  code_list = strarr(file_size)
-  readf, lun, code_list
-  free_lun, lun
+;  openr, lun, class_code_txt, /get_lun
+;  file_size = file_lines(class_code_txt,/noexpand_path)
+;  code_list = strarr(file_size)
+;  readf, lun, code_list
+;  free_lun, lun
   
   index = where((code_list ne "") eq 1, n_index)
   if n_index ge 1 then code_list = code_list[index]
@@ -29,20 +32,20 @@ pro run_label_class_filter, class_code_txt, label_parameters_txt, diag_file
   endfor
   
   ;find the outputs directory
-  openr, lun, label_parameters_txt, /get_lun
-  file_size = file_lines(label_parameters_txt,/noexpand_path)
-  folder = strarr(file_size)
-  readf, lun, folder
-  free_lun, lun
+  ;openr, lun, label_parameters_txt, /get_lun
+  ;file_size = file_lines(label_parameters_txt,/noexpand_path)
+  ;folder = strarr(file_size)
+  ;readf, lun, folder
+  ;free_lun, lun
   
-  runnameindex = where(strmatch(folder, "*run_name*") eq 1, n_index1)
-  if n_index1 ge 1 then runname = folder[runnameindex] else message, "cannot find 'run_name' in the label parameter file"
+  ;runnameindex = where(strmatch(folder, "*run_name*") eq 1, n_index1)
+  ;if n_index1 ge 1 then runname = folder[runnameindex] else message, "cannot find 'run_name' in the label parameter file"
   
-  split = strcompress(strsplit(runname, "=", /extract), /rem)
-  run_name = split[1]
+  ;split = strcompress(strsplit(runname, "=", /extract), /rem)
+  ;run_name = split[1]
   
-  directory = file_dirname(diag_file)
-  outputs_path = directory+pse+run_name+pse
+  ;directory = file_dirname(diag_file)
+  ;outputs_path = directory+pse+run_name+pse
   
   ;find the files that need to be filtered
   for i=0, n_elements(struct)-1 do begin
@@ -52,7 +55,8 @@ pro run_label_class_filter, class_code_txt, label_parameters_txt, diag_file
     if n_file ge 1 then begin
       for k=0, n_file-1 do begin
         dir = file_dirname(file[k])
-        dirtemp1 = dir+pse+"temp"+pse
+        ;dirtemp1 = dir+pse+"temp"+pse
+        dirtemp1 = dir+"/temp/"
         filebase = file_basename(file[k], ".bsq")
         searchfor = strcompress("*"+filebase+"*", /rem)
         filesorig = file_search(outputs_path, searchfor, count=n_files)
@@ -64,24 +68,28 @@ pro run_label_class_filter, class_code_txt, label_parameters_txt, diag_file
         if struct[i].fast eq 1 then begin
           print, 'Filtering Fast Disturbance'
           file_move, filesorig, filemove
-          dirtemp2 = dirtemp1+"temp"+pse
+          ;dirtemp2 = dirtemp1+"temp"+pse
+          dirtemp2 = dirtemp1+"temp/"
           file_mkdir, dirtemp2
           lt_label_class_filter_fast, dirtemp1, dirtemp2, mmu=struct[i].mmuf, subset=subset, /all_neighbors, dur_thresh=struct[i].durf
           file_move, filemove, filesorig
           filteredfiles = file_search(dirtemp2, "*", count=n_filteredfiles)
-          filteredfilesnew = strcompress(dir+pse+file_basename(filteredfiles), /rem)
+          ;filteredfilesnew = strcompress(dir+pse+file_basename(filteredfiles), /rem)
+          filteredfilesnew = strcompress(dir+"/"+file_basename(filteredfiles), /rem)
           if n_filteredfiles ge 1 then file_move, filteredfiles, filteredfilesnew
           print, 'Done Filtering Fast Disturbance'
         endif
         if struct[i].slow eq 1 then begin
           print, 'Filtering Slow Disturbance'
           file_move, filesorig, filemove
-          dirtemp2 = dirtemp1+"temp"+pse
+          ;dirtemp2 = dirtemp1+"temp"+pse
+          dirtemp2 = dirtemp1+"temp/"
           file_mkdir, dirtemp2
           lt_label_class_filter_slow, dirtemp1, dirtemp2, mmu=struct[i].mmus, subset=subset, /all_neighbors, dur_thresh=struct[i].durs
           file_move, filemove, filesorig
           filteredfiles = file_search(dirtemp2, "*", count=n_filteredfiles)
-          filteredfilesnew = strcompress(dir+pse+file_basename(filteredfiles), /rem)
+          ;filteredfilesnew = strcompress(dir+pse+file_basename(filteredfiles), /rem)
+          filteredfilesnew = strcompress(dir+"/"+file_basename(filteredfiles), /rem)
           if n_filteredfiles ge 1 then file_move, filteredfiles, filteredfilesnew
           print, 'Done Filtering Slow Disturbance'
         endif
