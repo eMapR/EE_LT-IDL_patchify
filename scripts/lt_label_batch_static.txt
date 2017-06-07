@@ -1,0 +1,59 @@
+
+;---pull out the label codes---
+codelistsplit = [""]
+for i=0, n_elements(label_codes)-1 do begin $
+  pieces = strcompress(strsplit(label_codes[i], ",", /extract), /rem) &$
+  codelistsplit = [codelistsplit, pieces[0]] &$
+endfor
+class_codes = codelistsplit[1:*]
+
+;---set up run parameter structures---
+filter_params = { $
+  static_model: static_model ,$
+  change_model: change_model ,$
+  pct_tree_loss1: pct_tree_loss1 ,$
+  pct_tree_loss20: pct_tree_loss20 ,$
+  pre_dist_cover: pre_dist_cover ,$
+  pct_tree_gain: pct_tree_gain ,$
+  collapse_dist_angle: collapse_dist_angle ,$
+  collapse_recv_angle: collapse_recv_angle}
+
+run_params = { $
+  ;run_name: run_name ,$
+  ;diag_file: diag_file ,$
+  in_path: in_path ,$
+  out_path: out_path ,$
+  min_year: min_year ,$
+  max_year: max_year ,$
+  class_codes: class_codes ,$
+  filter_params: filter_params ,$
+  merge_recovery: merge_recovery ,$
+  extract_tc_ftv: extract_tc_ftv ,$
+  use_relative_mag: use_relative_mag ,$
+  end_year: end_year ,$
+  start_year: start_year}
+
+;---run the label function---
+ok = lt_label(run_params)
+
+;---get the path to the label files---
+endpos = strpos(diag_file, '_diag.sav')
+simple_core_name =  strmid(diag_file, 0, endpos)
+path = file_dirname(simple_core_name, /mark_directory)
+core_name_file_component = file_basename(simple_core_name)
+outpath = path + run_name +"\"
+
+;---run the label filter function---
+run_label_class_filter, label_codes, out_path
+
+;---convert headers---
+;diag_dir = file_dirname(diag_file)
+;search = diag_dir+'*hdr'
+templatehdr = file_search(in_path + '*.hdr', count=n_files)
+if n_files eq 0 then begin $
+  print, ">>> error - could not find *.hdr file for use as a template in this directory:" &$
+  print, diag_dir &$
+  stop &$
+endif
+
+convert_bsq_headers_to_envi2, out_path, templatehdr[0]
