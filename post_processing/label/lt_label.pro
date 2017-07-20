@@ -111,6 +111,7 @@ function lt_label, run_params, subset=subset, output_path=output_path, sspan=ssp
   filter_params = run_params.filter_params
   merge_recovery = run_params.merge_recovery
   extract_tc_ftv = run_params.extract_tc_ftv
+  use_relative_mag = use_relative_mag
   end_year = run_params.end_year
   start_year = run_params.start_year
   
