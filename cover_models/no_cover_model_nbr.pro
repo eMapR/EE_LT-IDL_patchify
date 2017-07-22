@@ -20,7 +20,7 @@ function no_cover_model_nbr, spectral_value, equation=equation
 ;  by -1 and then get the values above 0 by adding an adjustment factor of sufficient size to do so across...
 ;  the range of values for the given index
   
-  cover_value = spectral_value
+  cover_value = spectral_value ;+10000
   equation = 'spectral_value'
 
   return, cover_value
