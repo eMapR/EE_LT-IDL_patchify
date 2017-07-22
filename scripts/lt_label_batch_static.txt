@@ -36,13 +36,6 @@ run_params = { $
 ;---run the label function---
 ok = lt_label(run_params)
 
-;---get the path to the label files---
-endpos = strpos(diag_file, '_diag.sav')
-simple_core_name =  strmid(diag_file, 0, endpos)
-path = file_dirname(simple_core_name, /mark_directory)
-core_name_file_component = file_basename(simple_core_name)
-outpath = path + run_name +"\"
-
 ;---run the label filter function---
 run_label_class_filter, label_codes, out_path
 
