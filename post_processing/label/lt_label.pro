@@ -465,11 +465,11 @@ function lt_label, run_params, subset=subset, output_path=output_path, sspan=ssp
       
       ;output requested for this class
       if write_details[class] gt 0 then begin
-        ;mask = lt_addon_filter_mask(this_image, 1985, 300)
-        ;d = dims(this_image)
-        ;for band = 0, d[2]-1 do begin
-        ;  this_image[*,*,band] = this_image[*,*,band]*mask
-        ;endfor  
+        mask = lt_addon_filter_mask(this_image, 1985, 2016, 300, 200)
+        d = dims(this_image)
+        for band = 0, d[2]-1 do begin
+          this_image[*,*,band] = this_image[*,*,band]*mask
+        endfor  
         
         openu, un, output_files[class], /get_lun
         n_segs = output_segs[class]
@@ -482,10 +482,10 @@ function lt_label, run_params, subset=subset, output_path=output_path, sspan=ssp
       endif
       
       if extract_tc_ftv eq 1 then begin
-        ;d = dims(ftv_image)
-        ;for band = 0, d[2]-1 do begin
-        ;  ftv_image[*,*,band] = ftv_image[*,*,band]*mask
-        ;endfor
+        d = dims(ftv_image)
+        for band = 0, d[2]-1 do begin
+          ftv_image[*,*,band] = ftv_image[*,*,band]*mask
+        endfor
         
         openu, un, ftv_files[class], /get_lun
         n_segs = output_segs[class]
@@ -500,7 +500,7 @@ function lt_label, run_params, subset=subset, output_path=output_path, sspan=ssp
     endfor  ;endfor class
     
     ;now we've done everything in this chunk.  need to write out the label image
-    ;label_image = label_image*mask
+    label_image = label_image*mask
     
     openu, un,    output_label_file, /get_lun
     
