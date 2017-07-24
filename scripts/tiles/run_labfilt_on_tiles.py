@@ -42,7 +42,7 @@ paths = glob(tileDir+'/*/')
 cmds = []
 for inPath in paths:
   tileID = inPath.split('/')[-2]
-  outPath = os.path.join(labelOutDir,tileID)
+  outPath = os.path.join(labelOutDir,tileID,'')
   paramFile = runFileDir+tileID+'_labfilt_runfile.pro'
   
   fn = open(paramFile, 'w') 
