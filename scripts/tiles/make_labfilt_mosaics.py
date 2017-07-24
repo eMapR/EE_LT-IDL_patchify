@@ -43,9 +43,9 @@ def get_feature_bounds(feature):
 ####################################################################################################
 ####################################################################################################
 
-tileDir = '/vol/v1/proj/cms/womi/raster/tiles_label'
+tileDir = '/vol/v1/proj/cms/womi/raster/tiles_label/v2/'
 fileSearch = ['*lt_ee_conus_nbr_20170417_greatest_disturbance_mmu11_tight.bsq']
-descript = 'cms_womi'
+descript = 'cms_womi_v2'
 outDir = '/vol/v1/proj/cms/womi/raster/mosaics_label/'
 clipFile = '/vol/v1/proj/cms/womi/vector/cms_womi_aoi_epsg5070_buffer150m.geojson'
 
