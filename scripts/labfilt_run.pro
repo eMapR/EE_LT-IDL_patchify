@@ -6,9 +6,8 @@ in_path              = '/vol/v1/general_files/user_files/justin/for_others/odfw_
 out_path             = in_path+'label_v01/'
 min_year             = 1984
 max_year             = 2016
-
 static_model         = "mr_224_static_nbr_cover_model" ;if no cover model, this needs to adjust for dist up or down
-change_model         = "none"  ;leave as "none"
+change_model         = "none" ;leave as "none"
 pct_tree_loss1       = 10
 pct_tree_loss20      = 3
 pre_dist_cover       = 20
@@ -16,8 +15,8 @@ pct_tree_gain        = 5
 collapse_dist_angle  = 15
 collapse_recv_angle  = 15
 merge_recovery       = 1 ; 1 (yes) or 0 (no)
-extract_tc_ftv       = 1  ; 1 (yes) or 0 (no)
-use_relative_mag     = 1  ; 1 (yes) or 0 (no)
+extract_tc_ftv       = 1 ; 1 (yes) or 0 (no)
+use_relative_mag     = 1 ; 1 (yes) or 0 (no)
 end_year             = -1
 start_year           = -1
 
@@ -81,13 +80,6 @@ run_params = { $
 
 ;---run the label function---
 ok = lt_label(run_params)
-
-;---get the path to the label files---
-endpos = strpos(diag_file, '_diag.sav')
-simple_core_name =  strmid(diag_file, 0, endpos)
-path = file_dirname(simple_core_name, /mark_directory)
-core_name_file_component = file_basename(simple_core_name)
-outpath = path + run_name +"\"
 
 ;---run the label filter function---
 run_label_class_filter, label_codes, out_path
